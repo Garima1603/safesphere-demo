@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapPin, Users, Mic, ShieldAlert, ClipboardList, Phone, Clock,
   CheckCircle2, Home, Search, Navigation2, WifiOff, Building2, Hospital, BadgeCheck, ExternalLink,
   LocateFixed, ArrowLeft, CircleAlert, Siren, Circle, Send, AlertTriangle, Navigation, MessageSquare,
-  ThumbsUp, ThumbsDown, Flag, Lock, Eye, ChevronRight, X, RefreshCw
+  ThumbsUp, ThumbsDown, Flag, Lock, Eye, ChevronRight, X, RefreshCw, Sun, Moon
 } from "lucide-react";
 
 // ---------- Design tokens ----------
-const C = {
+const LIGHT = {
   navy: "#1B2A4A",
   navyLight: "#2B3D63",
   bg: "#F4F6F5",
@@ -25,12 +25,36 @@ const C = {
   highBg: "#FBE3E4",
 };
 
-const LEVEL_META = {
-  safe: { label: "Low risk / community verified", color: C.safe, bg: C.safeBg },
-  moderate: { label: "Moderate risk", color: C.moderate, bg: C.moderateBg },
-  higher: { label: "Higher risk", color: C.higher, bg: C.higherBg },
-  high: { label: "High risk", color: C.high, bg: C.highBg },
+const DARK = {
+  navy: "#0F1830",
+  navyLight: "#1B2A4A",
+  bg: "#12161C",
+  card: "#1A1F28",
+  ink: "#EDEFF2",
+  sub: "#9AA3AF",
+  line: "#2A2F3A",
+  safe: "#3FBE86",
+  safeBg: "#16302A",
+  moderate: "#E3B24C",
+  moderateBg: "#332A14",
+  higher: "#E5904F",
+  higherBg: "#38230F",
+  high: "#E8636D",
+  highBg: "#3A171A",
 };
+
+// Reassigned by SafeSphere() on theme toggle. Every other component in this
+// file reads C.xxx at render time, so mutating this binding re-themes them all.
+let C = LIGHT;
+
+function getLevelMeta() {
+  return {
+    safe: { label: "Low risk / community verified", color: C.safe, bg: C.safeBg },
+    moderate: { label: "Moderate risk", color: C.moderate, bg: C.moderateBg },
+    higher: { label: "Higher risk", color: C.higher, bg: C.higherBg },
+    high: { label: "High risk", color: C.high, bg: C.highBg },
+  };
+}
 
 const TIME_SLOTS = ["2 PM", "7 PM", "9 PM", "11 PM", "1 AM"];
 
@@ -122,7 +146,7 @@ function todayStr() {
 
 // ---------- Small UI atoms ----------
 function LevelChip({ level, score }) {
-  const m = LEVEL_META[level];
+  const m = getLevelMeta()[level];
   return (
     <span
       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
@@ -152,6 +176,14 @@ function NavItem({ icon: Icon, label, active, onClick }) {
 
 // ---------- Main App ----------
 export default function SafeSphere() {
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
+  C = theme === "light" ? LIGHT : DARK;
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
   const [tab, setTab] = useState("map");
   const [timeIdx, setTimeIdx] = useState(1);
   const time = TIME_SLOTS[timeIdx];
@@ -160,12 +192,19 @@ export default function SafeSphere() {
     <div className="flex min-h-screen w-full" style={{ backgroundColor: C.bg, fontFamily: "Inter, sans-serif", color: C.ink }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');`}</style>
 
-      {/* Sidebar */}
       <aside className="hidden md:flex flex-col w-56 shrink-0 p-4 gap-1" style={{ backgroundColor: C.navy }}>
         <div className="px-2 pb-5 pt-2">
           <div className="text-white text-xl font-bold" style={{ fontFamily: "Sora, sans-serif" }}>SafeSphere</div>
           <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Know. Protect. Report. Follow up.</div>
         </div>
+        <button
+          onClick={() => setTheme(t => t === "light" ? "dark" : "light")}
+          className="mx-2 mb-3 flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs"
+          style={{ color: "rgba(255,255,255,0.75)", backgroundColor: "rgba(255,255,255,0.08)" }}
+        >
+          {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
+          {theme === "light" ? "Dark mode" : "Light mode"}
+        </button>
         <NavItem icon={MapPin} label="Safety map" active={tab === "map"} onClick={() => setTab("map")} />
         <NavItem icon={Home} label="Safe Haven" active={tab === "haven"} onClick={() => setTab("haven")} />
         <NavItem icon={Users} label="Community" active={tab === "community"} onClick={() => setTab("community")} />
@@ -174,7 +213,6 @@ export default function SafeSphere() {
         <NavItem icon={ClipboardList} label="My reports" active={tab === "reports"} onClick={() => setTab("reports")} />
       </aside>
 
-      {/* Mobile top nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-20 flex justify-around py-2 border-t" style={{ backgroundColor: C.navy, borderColor: C.navyLight }}>
         {[["map", MapPin], ["community", Users], ["safespeak", Mic], ["sos", ShieldAlert], ["reports", ClipboardList]].map(([id, Icon]) => (
           <button key={id} onClick={() => setTab(id)} className="p-2 rounded-lg" style={{ color: tab === id ? "#fff" : "rgba(255,255,255,0.55)" }}>
@@ -183,7 +221,6 @@ export default function SafeSphere() {
         ))}
       </div>
 
-      {/* Main */}
       <main className="flex-1 p-5 md:p-8 pb-20 md:pb-8 max-w-5xl mx-auto w-full">
         {tab === "map" && <MapTab timeIdx={timeIdx} setTimeIdx={setTimeIdx} time={time} />}
         {tab === "haven" && <SafeHavenTab />}
