@@ -191,6 +191,10 @@ export default function SafeSphere() {
   return (
     <div className="flex min-h-screen w-full" style={{ backgroundColor: C.bg, fontFamily: "Inter, sans-serif", color: C.ink }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');`}</style>
+      <style>{`
+        .ss-field::placeholder { color: ${C.sub}; opacity: 1; }
+        .ss-field option { background-color: ${C.card}; color: ${C.ink}; }
+      `}</style>
 
       <aside className="hidden md:flex flex-col w-56 shrink-0 p-4 gap-1" style={{ backgroundColor: C.navy }}>
         <div className="px-2 pb-5 pt-2">
@@ -439,8 +443,8 @@ function CommunityTab() {
         <textarea
           value={draft} onChange={(e) => { setDraft(e.target.value); setPreview(false); }}
           placeholder="Share something the community should know — e.g. a broken streetlight, a route with good lighting, a repeated pattern you've noticed."
-          className="w-full text-sm rounded-lg p-3 outline-none resize-none"
-          style={{ border: `1px solid ${C.line}`, minHeight: 80 }}
+          className="w-full text-sm rounded-lg p-3 outline-none resize-none ss-field"
+          style={{ border: `1px solid ${C.line}`, minHeight: 80, backgroundColor: C.card, color: C.ink }}
         />
         {draft.trim() && (
           <div className="mt-2 flex items-start gap-2 text-xs rounded-lg p-2.5" style={{ backgroundColor: C.bg, color: C.sub }}>
@@ -549,8 +553,8 @@ User's description: "${input}"`,
         <textarea
           value={input} onChange={(e) => setInput(e.target.value)}
           placeholder='e.g. "A man has been following me from the metro station every evening for the last three days."'
-          className="w-full text-sm rounded-lg p-3 outline-none resize-none"
-          style={{ border: `1px solid ${C.line}`, minHeight: 90 }}
+          className="w-full text-sm rounded-lg p-3 outline-none resize-none ss-field"
+          style={{ border: `1px solid ${C.line}`, minHeight: 90, backgroundColor: C.card, color: C.ink }}
         />
         <div className="flex justify-end mt-3">
           <button onClick={structure} disabled={loading} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: C.navy }}>
@@ -575,7 +579,7 @@ User's description: "${input}"`,
             <div>
               <label className="text-xs font-semibold" style={{ color: C.sub }}>Severity</label>
               <select value={structured.severity} onChange={(e) => updateField("severity", e.target.value)}
-                className="w-full text-sm rounded-lg p-2 mt-1 outline-none" style={{ border: `1px solid ${C.line}` }}>
+                className="w-full text-sm rounded-lg p-2 mt-1 outline-none ss-field" style={{ border: `1px solid ${C.line}`, backgroundColor: C.card, color: C.ink }}>
                 <option>Low</option><option>Medium</option><option>High</option>
               </select>
             </div>
@@ -602,7 +606,7 @@ function Field({ label, value, onChange }) {
     <div>
       <label className="text-xs font-semibold" style={{ color: C.sub }}>{label}</label>
       <input value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full text-sm rounded-lg p-2 mt-1 outline-none" style={{ border: `1px solid ${C.line}` }} />
+        className="w-full text-sm rounded-lg p-2 mt-1 outline-none ss-field" style={{ border: `1px solid ${C.line}`, backgroundColor: C.card, color: C.ink }} />
     </div>
   );
 }
@@ -633,19 +637,19 @@ function SOSTab() {
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs font-semibold" style={{ color: C.sub }}>Phrase</label>
-            <select value={phrase} onChange={(e) => setPhrase(e.target.value)} className="w-full text-sm rounded-lg p-2 mt-1" style={{ border: `1px solid ${C.line}` }}>
+            <select value={phrase} onChange={(e) => setPhrase(e.target.value)} className="w-full text-sm rounded-lg p-2 mt-1 ss-field" style={{ border: `1px solid ${C.line}`, backgroundColor: C.card, color: C.ink }}>
               <option>Code Blue</option><option>Help Now</option><option>Red Alert</option>
             </select>
           </div>
           <div>
             <label className="text-xs font-semibold" style={{ color: C.sub }}>Gesture</label>
-            <select value={gesture} onChange={(e) => setGesture(e.target.value)} className="w-full text-sm rounded-lg p-2 mt-1" style={{ border: `1px solid ${C.line}` }}>
+            <select value={gesture} onChange={(e) => setGesture(e.target.value)} className="w-full text-sm rounded-lg p-2 mt-1 ss-field" style={{ border: `1px solid ${C.line}`, backgroundColor: C.card, color: C.ink }}>
               <option>Shake phone</option><option>Long press power button</option><option>Triple tap screen</option>
             </select>
           </div>
           <div className="sm:col-span-2">
             <label className="text-xs font-semibold" style={{ color: C.sub }}>Trusted contact</label>
-            <input value={contact} onChange={(e) => setContact(e.target.value)} className="w-full text-sm rounded-lg p-2 mt-1" style={{ border: `1px solid ${C.line}` }} />
+            <input value={contact} onChange={(e) => setContact(e.target.value)} className="w-full text-sm rounded-lg p-2 mt-1 ss-field" style={{ border: `1px solid ${C.line}`, backgroundColor: C.card, color: C.ink }} />
           </div>
         </div>
         <p className="text-xs mt-3" style={{ color: C.sub }}>Trigger set: <strong>{phrase}</strong> + <strong>{gesture}</strong></p>
