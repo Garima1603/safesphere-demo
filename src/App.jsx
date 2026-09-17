@@ -404,9 +404,9 @@ function MapTab({ timeIdx, setTimeIdx, time }) {
 // ---------- Community Tab ----------
 function CommunityTab() {
   const [posts, setPosts] = useState([
-    { id: 1, category: "Poor lighting", text: "Streetlight near Gate 3 has been broken for two weeks.", up: 14, down: 0, verified: true },
-    { id: 2, category: "Positive safety info", text: "This stretch near the market has good lighting and high footfall even after 9 PM.", up: 9, down: 1, verified: true },
-    { id: 3, category: "Harassment", text: "Repeated catcalling reported near the metro exit around evening rush hour.", up: 21, down: 2, verified: false },
+    { id: 1, category: "Poor lighting", text: "Streetlight near Gate 3 has been broken for two weeks.", up: 14, down: 0, verified: true, reaction: null },
+    { id: 2, category: "Positive safety info", text: "This stretch near the market has good lighting and high footfall even after 9 PM.", up: 9, down: 1, verified: true, reaction: null },
+    { id: 3, category: "Harassment", text: "Repeated catcalling reported near the metro exit around evening rush hour.", up: 21, down: 2, verified: false, reaction: null },
   ]);
   const [draft, setDraft] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -416,13 +416,31 @@ function CommunityTab() {
 
   function submit() {
     if (!draft.trim()) return;
-    setPosts([{ id: Date.now(), category, text: redact(draft), up: 0, down: 0, verified: false }, ...posts]);
+    setPosts([{ id: Date.now(), category, text: redact(draft), up: 0, down: 0, verified: false, reaction: null }, ...posts]);
     setDraft("");
     setPreview(false);
   }
 
   function vote(id, dir) {
-    setPosts(posts.map((p) => p.id === id ? { ...p, up: dir === "up" ? p.up + 1 : p.up, down: dir === "down" ? p.down + 1 : p.down } : p));
+    setPosts(posts.map((p) => {
+      if (p.id !== id) return p;
+      const prev = p.reaction;
+      if (prev === dir) {
+        // toggle off: remove reaction
+        return { ...p, reaction: null, up: dir === "up" ? p.up - 1 : p.up, down: dir === "down" ? p.down - 1 : p.down };
+      } else if (prev === null) {
+        // fresh reaction
+        return { ...p, reaction: dir, up: dir === "up" ? p.up + 1 : p.up, down: dir === "down" ? p.down + 1 : p.down };
+      } else {
+        // switch reaction: undo old, apply new
+        return {
+          ...p,
+          reaction: dir,
+          up:   dir === "up"   ? p.up + 1   : p.up - 1,
+          down: dir === "down" ? p.down + 1 : p.down - 1,
+        };
+      }
+    }));
   }
 
   return (
@@ -471,8 +489,8 @@ function CommunityTab() {
             </div>
             <p className="text-sm mt-2">{p.text}</p>
             <div className="flex items-center gap-4 mt-3">
-              <button onClick={() => vote(p.id, "up")} className="flex items-center gap-1 text-xs" style={{ color: C.sub }}><ThumbsUp size={14} /> {p.up}</button>
-              <button onClick={() => vote(p.id, "down")} className="flex items-center gap-1 text-xs" style={{ color: C.sub }}><ThumbsDown size={14} /> {p.down}</button>
+              <button onClick={() => vote(p.id, "up")} className="flex items-center gap-1 text-xs font-medium" style={{ color: p.reaction === "up" ? C.safe : C.sub }}><ThumbsUp size={14} /> {p.up}</button>
+              <button onClick={() => vote(p.id, "down")} className="flex items-center gap-1 text-xs font-medium" style={{ color: p.reaction === "down" ? C.high : C.sub }}><ThumbsDown size={14} /> {p.down}</button>
               <button className="flex items-center gap-1 text-xs ml-auto" style={{ color: C.sub }}><Flag size={13} /> Report</button>
             </div>
           </div>
